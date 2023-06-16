@@ -2,7 +2,7 @@
 
 This Python package creates a function decorator `@openaifunc` which can be used to automatically generate the `functions` parameter for the ChatGPT API.
 
-This code was generated with GPT-4. I'm new to Python and have never created a Python package.
+This code was generated [with GPT-4](https://chat.openai.com/share/d32b7a1c-1b5d-4d2f-895e-edc2e6576164). I'm new to Python and have never created a Python package.
 
 Inspired by @memespdf on @sentdex [YouTube-video](https://www.youtube.com/watch?v=0lOSvOoF2to) comments
 

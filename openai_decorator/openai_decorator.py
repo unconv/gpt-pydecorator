@@ -11,6 +11,7 @@ type_mapping = {
     str: "string",
     bool: "boolean",
     list: "array",
+    tuple: "array",
     dict: "object",
     None: "null",
 }

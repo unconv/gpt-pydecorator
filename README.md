@@ -2,7 +2,7 @@
 
 This Python package creates a function decorator `@openaifunc` which can be used to automatically generate the `functions` parameter for the ChatGPT API.
 
-This code was generated [with GPT-4](https://chat.openai.com/share/d32b7a1c-1b5d-4d2f-895e-edc2e6576164). I'm new to Python and have never created a Python package.
+The original code was generated [with GPT-4](https://chat.openai.com/share/d32b7a1c-1b5d-4d2f-895e-edc2e6576164). I'm new to Python and have never created a Python package.
 
 Inspired by @memespdf on @sentdex [YouTube-video](https://www.youtube.com/watch?v=0lOSvOoF2to) comments
 
@@ -32,6 +32,55 @@ response = openai.ChatCompletion.create(
     functions=get_openai_funcs(),
     function_call="auto",
 )
+```
+
+## Parameter descriptions
+
+As far as I know, there is no "official" way to add docstrings for parameters in Python, but you can add the parameter definitions to the docstring in PHP DocBlock style, and GPT-4 seems to obey them.
+
+```python
+@openaifunc
+def get_current_weather(location: str, country: str) -> str:
+    """
+    Gets the current weather information
+    @param location: The location for which to get the weather
+    @param country: The country in which to look for the location
+    """
+
+    if location is None:
+        return "A location must be provided. Please ask the user which location they want the weather for"
+    else:
+        return "The weather is nice and sunny"
+```
+
+Currently, this will not populate the `description` of the parameters in the API request, but GPT-4 still adheres to the rules.
+
+## Pydantic Models
+
+You can also set descriptions for the function parameters with Pydantic models. This will actually populate the `description` of the parameters in the API request.
+
+```python
+from pydantic import BaseModel, Field
+
+class LocationModel(BaseModel):
+    location: str = Field(
+        description="The location for which to get the weather"
+    )
+    country: str = Field(
+        description="The country in which to look for the location"
+    )
+
+@openaifunc
+def get_current_weather(location: LocationModel) -> str:
+    """
+    Gets the current weather information
+    """
+    location = LocationModel.parse_obj(location)
+
+    if location is None:
+        return "A location must be provided. Please ask the user which location they want the weather for"
+    else:
+        return "The weather is nice and sunny"
 ```
 
 ## Chatbot

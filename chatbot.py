@@ -9,13 +9,19 @@ import json
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @openaifunc
-def get_current_weather(location: str) -> str:
+def get_current_weather(location: str, country: str) -> str:
     """
     Gets the current weather information
+    @param location: The location for which to get the weather
+    @param country: The ISO 3166-1 alpha-2 country code
     """
-    if location is None:
-        return "A location must be provided. Please ask the user which location they want the weather for"
-    return "The weather is nice and sunny"
+
+    if country == "FR":
+        return "The weather is terrible, as always"
+    elif location == "California":
+        return "The weather is nice and sunny"
+    else:
+        return "It's rainy and windy"
 
 @openaifunc
 def recommend_youtube_channel() -> str:
@@ -32,17 +38,15 @@ def calculate_str_length(string: str) -> str:
     return str(len(string))
 
 # ChatGPT API Function
-def send_message(
-    message,
-    messages
-):
+def send_message(message, messages):
     # add user message to message list
     messages.append(message)
 
     try:
         # send prompt to chatgpt
         response = openai.ChatCompletion.create(
-            model="gpt-4-0613",
+            # model="gpt-4-0613",
+            model="gpt-3.5-turbo-0613",
             messages=messages,
             functions=get_openai_funcs(),
             function_call="auto",
@@ -57,7 +61,7 @@ def send_message(
     return messages
 
 # MAIN FUNCTION
-def run_conversation(prompt, messages = []):
+def run_conversation(prompt, messages=[]):
     # add user prompt to chatgpt messages
     messages = send_message({"role": "user", "content": prompt}, messages)
 
@@ -75,11 +79,14 @@ def run_conversation(prompt, messages = []):
             function_response = globals()[function_name](**arguments)
 
             # send function result to chatgpt
-            messages = send_message({
-                "role": "function",
-                "name": function_name,
-                "content": function_response,
-            }, messages)
+            messages = send_message(
+                {
+                    "role": "function",
+                    "name": function_name,
+                    "content": function_response,
+                },
+                messages,
+            )
         else:
             # if chatgpt doesn't respond with a function call, ask user for input
             print("ChatGPT: " + message["content"])
@@ -87,16 +94,21 @@ def run_conversation(prompt, messages = []):
             user_message = input("You: ")
 
             # send user message to chatgpt
-            messages = send_message({
-                "role": "user",
-                "content": user_message,
-            }, messages)
+            messages = send_message(
+                {
+                    "role": "user",
+                    "content": user_message,
+                },
+                messages,
+            )
 
         # save last response for the while loop
         message = messages[-1]
 
 # ASK FOR PROMPT
-print("Go ahead, ask for the weather, a YouTube channel recommendation or to calculate the length of a string!")
+print(
+    "Go ahead, ask for the weather, a YouTube channel recommendation or to calculate the length of a string!"
+)
 prompt = input("You: ")
 
 # RUN CONVERSATION

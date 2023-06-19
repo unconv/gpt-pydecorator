@@ -1,6 +1,6 @@
 import inspect
 import functools
-from pydantic import BaseModel
+import importlib.util
 
 # Global variable to store all functions decorated with @openaifunc
 openai_functions = []
@@ -20,21 +20,27 @@ type_mapping = {
 
 def get_params_dict(params):
     params_dict = {}
+    # Add optional pydantic support
+    pydantic_found = importlib.util.find_spec("pydantic")
+    if pydantic_found:
+        from pydantic import BaseModel
     for k, v in params.items():
-        if issubclass(v.annotation, BaseModel):
-            # Consider BaseModel fields as dictionaries
-            params_dict[k] = {
-                "type": "object",
-                "properties": {
-                    field_name: {
-                        "type": property.get("type", "unknown"),
-                        "description": property.get("description", ""),
-                    }
-                    for field_name, property in v.annotation.schema()[
-                        "properties"
-                    ].items()
-                },
-            }
+        if pydantic_found:
+            if issubclass(v.annotation, BaseModel):
+                # Consider BaseModel fields as dictionaries
+                params_dict[k] = {
+                    "type": "object",
+                    "properties": {
+                        field_name: {
+                            "type": property.get("type", "unknown"),
+                            "description": property.get("description", ""),
+                        }
+                        for field_name, property in v.annotation.schema()[
+                            "properties"
+                        ].items()
+                    },
+                }
+            continue
         else:
             params_dict[k] = {
                 "type": type_mapping.get(v.annotation, "unknown"),

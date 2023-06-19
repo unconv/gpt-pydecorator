@@ -23,7 +23,6 @@ def get_current_weather(location: str, country: str) -> str:
     else:
         return "It's rainy and windy"
 
-
 @openaifunc
 def recommend_youtube_channel() -> str:
     """
@@ -31,14 +30,12 @@ def recommend_youtube_channel() -> str:
     """
     return "Unconventional Coding"
 
-
 @openaifunc
 def calculate_str_length(string: str) -> str:
     """
     Calculates the length of a string
     """
     return str(len(string))
-
 
 # ChatGPT API Function
 def send_message(message, messages):
@@ -62,7 +59,6 @@ def send_message(message, messages):
     messages.append(response["choices"][0]["message"])
 
     return messages
-
 
 # MAIN FUNCTION
 def run_conversation(prompt, messages=[]):
@@ -108,7 +104,6 @@ def run_conversation(prompt, messages=[]):
 
         # save last response for the while loop
         message = messages[-1]
-
 
 # ASK FOR PROMPT
 print(

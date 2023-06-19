@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from openai_decorator.openai_decorator import openaifunc, get_openai_funcs
-from pydantic import BaseModel, Field
 
 import openai
 import os
@@ -9,24 +8,20 @@ import json
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-
-class LocationModel(BaseModel):
-    location: str = Field(description="The location for which to get the weather")
-    country: str = Field(description="The country in which to look for the location")
-
-
 @openaifunc
-def get_current_weather(location: LocationModel) -> str:
+def get_current_weather(location: str, country: str) -> str:
     """
     Gets the current weather information
+    @param location: The location for which to get the weather
+    @param country: The ISO 3166-1 alpha-2 country code
     """
-    location = LocationModel.parse_obj(location)
-    if location is None:
-        return "A location must be provided. Please ask the user which location they want the weather for"
-    if location.country == "France":
+
+    if country == "FR":
         return "The weather is terrible, as always"
-    else:
+    elif location == "California":
         return "The weather is nice and sunny"
+    else:
+        return "It's rainy and windy"
 
 
 @openaifunc

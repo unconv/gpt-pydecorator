@@ -7,19 +7,20 @@ openai_functions = []
 
 # Map python types to JSON schema types
 type_mapping = {
-    "<class 'int'>": "integer",
-    "<class 'float'>": "number",
-    "<class 'str'>": "string",
-    "<class 'bool'>": "boolean",
-    "<class 'list'>": "array",
-    "<class 'tuple'>": "array",
-    "<class 'dict'>": "object",
-    "None": "null",
-
-    # for typed lists and tuples
+    "int": "integer",
+    "float": "number",
+    "str": "string",
+    "bool": "boolean",
     "list": "array",
     "tuple": "array",
+    "dict": "object",
+    "None": "null",
 }
+
+def get_type_mapping(param_type):
+    param_type = param_type.replace("<class '", '')
+    param_type = param_type.replace("'>", '')
+    return type_mapping.get(param_type, "string")
 
 def get_params_dict(params):
     params_dict = {}
@@ -54,20 +55,29 @@ def get_params_dict(params):
 
             try:
                 array_type = annotation[1].strip("]")
-                array_type = type_mapping.get(array_type, "string")
             except IndexError:
                 array_type = "string"
 
-            param_type = type_mapping.get(param_type, "string")
+            param_type = get_type_mapping(param_type)
             params_dict[k] = {
                 "type": param_type,
                 "description": "",
             }
 
             if param_type == "array":
-                params_dict[k]["items"] = {
-                    "type": array_type,
-                }
+                if "," in array_type:
+                    array_types = array_type.split(", ")
+                    params_dict[k]["prefixItems"] = []
+                    for i, array_type in enumerate(array_types):
+                        array_type = get_type_mapping(array_type)
+                        params_dict[k]["prefixItems"].append({
+                            "type": array_type,
+                        })
+                else:
+                    array_type = get_type_mapping(array_type)
+                    params_dict[k]["items"] = {
+                        "type": array_type,
+                    }
     return params_dict
 
 def openaifunc(func):

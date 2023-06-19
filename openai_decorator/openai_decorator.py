@@ -7,16 +7,19 @@ openai_functions = []
 
 # Map python types to JSON schema types
 type_mapping = {
-    int: "integer",
-    float: "number",
-    str: "string",
-    bool: "boolean",
-    list: "array",
-    tuple: "array",
-    dict: "object",
-    None: "null",
-}
+    "<class 'int'>": "integer",
+    "<class 'float'>": "number",
+    "<class 'str'>": "string",
+    "<class 'bool'>": "boolean",
+    "<class 'list'>": "array",
+    "<class 'tuple'>": "array",
+    "<class 'dict'>": "object",
+    "None": "null",
 
+    # for typed lists and tuples
+    "list": "array",
+    "tuple": "array",
+}
 
 def get_params_dict(params):
     params_dict = {}
@@ -42,12 +45,30 @@ def get_params_dict(params):
                 }
             continue
         else:
+            annotation = str(v.annotation).split("[")
+
+            try:
+                param_type = annotation[0]
+            except IndexError:
+                param_type = "string"
+
+            try:
+                array_type = annotation[1].strip("]")
+                array_type = type_mapping.get(array_type, "string")
+            except IndexError:
+                array_type = "string"
+
+            param_type = type_mapping.get(param_type, "string")
             params_dict[k] = {
-                "type": type_mapping.get(v.annotation, "unknown"),
+                "type": param_type,
                 "description": "",
             }
-    return params_dict
 
+            if param_type == "array":
+                params_dict[k]["items"] = {
+                    "type": array_type,
+                }
+    return params_dict
 
 def openaifunc(func):
     @functools.wraps(func)
@@ -72,7 +93,6 @@ def openaifunc(func):
     )
 
     return wrapper
-
 
 def get_openai_funcs():
     return openai_functions

@@ -11,8 +11,8 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 class LocationModel(BaseModel):
-    location: str = Field(description="The name of the place in the real world")
-    country: str = Field(description="The country in which to look for the place")
+    location: str = Field(description="The location for which to get the weather")
+    country: str = Field(description="The country in which to look for the location")
 
 
 @openaifunc

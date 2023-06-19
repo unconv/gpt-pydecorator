@@ -20,10 +20,9 @@ type_mapping = {
 
 def get_params_dict(params):
     params_dict = {}
-    print(params)
     for k, v in params.items():
         if issubclass(v.annotation, BaseModel):
-            print(list(v.annotation.schema()["properties"].items()))
+            # Consider BaseModel fields as dictionaries
             params_dict[k] = {
                 "type": "object",
                 "properties": {
